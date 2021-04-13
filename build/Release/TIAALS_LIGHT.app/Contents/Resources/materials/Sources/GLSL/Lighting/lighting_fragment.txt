@@ -1,0 +1,12 @@
+uniform vec3 MaterialColour;
+varying float Diffuse;
+
+varying float lightIntensity;
+
+void main()
+{
+    float l = max (0.3, lightIntensity * 0.3);
+    float l2 = max(0.3, lightIntensity * 0.3);
+    vec4 colour = vec4 (l,0.1,0.3,0.1) + vec4(0.0, l2, 0.2, 0.1);
+    gl_FragColor = colour;
+}

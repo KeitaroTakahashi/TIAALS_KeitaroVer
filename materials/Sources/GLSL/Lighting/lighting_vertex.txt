@@ -1,0 +1,29 @@
+
+attribute vec4 position;
+attribute vec4 normal;
+
+uniform float shiness;
+varying float Diffuse;
+
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
+uniform vec4 lightPosition;
+uniform vec3 vertexOffset;
+uniform float vertexScaleIn;
+uniform float vertexScaleOut;
+uniform vec3 vertexXYZAmount;
+
+varying float lightIntensity;
+
+void main()
+{
+vec4 light = viewMatrix * lightPosition;
+lightIntensity = dot (light, normal);
+vec3 vertex = position.xyz + noise3 (vertexOffset + position.xyz * vertexScaleIn * vertexXYZAmount) *
+vertexScaleOut * 1.0;
+
+
+
+gl_Position = projectionMatrix * viewMatrix * vec4(vertex, 1.0);
+
+}
