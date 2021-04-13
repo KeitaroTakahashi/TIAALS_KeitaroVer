@@ -355,6 +355,8 @@ private:
 
 private:
     void resizingSquareDraggedAction(MouseEvent e) override;
+    
+    void objectRotated(float angle) override;
 
 private:
     

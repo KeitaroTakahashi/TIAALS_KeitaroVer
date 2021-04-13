@@ -67,6 +67,8 @@ public:
     
     void setRotateDegree(float amount);
     
+    void setAngle(float angle) { this->angle = angle; }
+    
 private:
     void resizingSquareClicked(IRResizeSquare2::MovableDirection direction);
     // called when resizing square is released (mouse up event)
@@ -92,7 +94,7 @@ private:
     void objAboutToResized();
     void objAboutToMoved();
     
-    
+    Rectangle<float> calcRotatedXY(float deltaX, float deltaY, float angle);
     // ==================================================
 
     // resizing method
@@ -148,6 +150,8 @@ private:
     float previousY = 0;
         
     bool isEditModeFlag = false;
+    
+    float angle = 0.0;
     
 
 

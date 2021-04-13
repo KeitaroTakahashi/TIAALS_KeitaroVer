@@ -42,10 +42,7 @@ void IRObjectBase::setObjectCentredPosition(int x, int y, NotificationType n)
     int fx = getWidth() / 2;
     int fy = getHeight() / 2;
     setObjectBounds(x - fx, y - fy, getWidth(), getHeight());
-    
-    // NEED TO IMPLEMENT THIS LATER!!!
-    //updateResizingSquare();
-    
+ 
     aboutToMoveAction();
     if(this->aboutToMoveCallback != nullptr)
         this->aboutToMoveCallback();
@@ -63,6 +60,7 @@ void IRObjectBase::setObjectCentredPosition(int x, int y, NotificationType n)
 
 void IRObjectBase::boundChangeTask(Rectangle<int> bounds, NotificationType n)
 {
+    //resetRotate();
     if(this->bType == ABSOLUTE)
     {
         setBounds(bounds);
@@ -91,9 +89,8 @@ void IRObjectBase::boundChangeTask(Rectangle<int> bounds, NotificationType n)
     }
     
     // at the end, do rotate if angle is given
-    doRotate(true, this->rotateAngle);
+    //doRotate(true, this->rotateAngle);
     
-    //updateResizingSquare();
     
     aboutToResized();
     
@@ -294,7 +291,6 @@ void IRObjectBase::setSize(float width, float height)
     setObjectBounds(x, y, w, h);
     
     
-    //updateResizingSquare();
     aboutToResized();
 }
 
@@ -378,9 +374,16 @@ void IRObjectBase::doRotate(bool clockwise, float angle)
     if (! clockwise)
         angle *= -1.0f;
     //setSize(verticalBounds.getHeight(), verticalBounds.getWidth());
+
     int x = getBounds().getCentreX();
     int y = getBounds().getCentreY();
-    //setCentrePosition(0, 0);
     setTransform(AffineTransform::rotation(angle * float_Pi / 180.0, x, y));
+    
+    objectRotated(angle);
+}
+
+void IRObjectBase::resetRotate()
+{
+    setTransform(AffineTransform::rotation(0, 0, 0));
 }
 // ==================================================

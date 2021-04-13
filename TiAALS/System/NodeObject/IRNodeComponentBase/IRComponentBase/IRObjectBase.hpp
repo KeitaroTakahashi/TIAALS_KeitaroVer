@@ -157,10 +157,12 @@ private:
     public:
         void setRotateAngle(float rotate);
         float getRotateAngle() const { return this->rotateAngle; }
+    
+    virtual void objectRotated(float rotate) {}
     private:
         float rotateAngle = 0.0;
         void doRotate(bool clockwise, float angle);
-
+    void resetRotate();
     // ==================================================
     
     // ==================================================

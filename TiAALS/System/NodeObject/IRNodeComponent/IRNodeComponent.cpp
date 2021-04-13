@@ -580,3 +580,14 @@ void IRNodeComponent::resizingSquareDraggedAction(MouseEvent e)
 {
     resizingAction();
 }
+
+void IRNodeComponent::objectRotated(float angle)
+{
+    
+
+    int x = this->resizingSquare.getBounds().getCentreX();
+    int y = this->resizingSquare.getBounds().getCentreY();
+    this->resizingSquare.setTransform(AffineTransform::rotation(angle * float_Pi / 180.0, x, y));
+    setAngle(angle);
+
+}
