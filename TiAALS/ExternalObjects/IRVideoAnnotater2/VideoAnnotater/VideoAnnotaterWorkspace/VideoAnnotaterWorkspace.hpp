@@ -79,7 +79,10 @@ private:
     void command5Pressed() override;
 
     void openVideoFileAction();
+
+private:
     // --------------------------------------------------
+
     //IRNodeObject
     
     void nodeObjectStartEndTimeChanged(IRNodeObject* obj) override;

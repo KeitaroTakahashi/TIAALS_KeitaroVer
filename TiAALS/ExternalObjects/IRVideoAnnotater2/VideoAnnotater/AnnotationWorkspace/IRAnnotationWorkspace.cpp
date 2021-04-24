@@ -46,7 +46,7 @@ void IRAnnotationWorkspace::loadThisFromSaveData(json11::Json saveData)
             std::string objectTypeId = it->second["objectType"].string_value();
             
             //IRNodeObject* obj = static_cast<IRNodeObject*>(getStr()->createNewObject(objectTypeId, this, getStr()));
-            IRNodeObject* obj = createObjectFromId(objectTypeId);
+            IRNodeObject* obj = createObjectFromId(objectTypeId, this);
             
             std::cout << objectTypeId << " created : " << obj << std::endl;
 
@@ -69,29 +69,29 @@ void IRAnnotationWorkspace::loadThisFromSaveData(json11::Json saveData)
 }
 
 
-IRNodeObject* IRAnnotationWorkspace::createObjectFromId(String id)
+IRNodeObject* IRAnnotationWorkspace::createObjectFromId(String id, IRWorkspaceComponent* parent)
 {
     if ( id == "IRTextEditor")
     {
-        return createTextObjectFromId();
+        return createTextObjectFromId(parent);
     }else if( id == "IRShape")
     {
-        return createTextObjectFromId();
+        return createShapeObjectFromId(parent);
     }else if( id == "IRImageViewer")
     {
-        return createImageObjectFromId();
-    }
+        return createImageObjectFromId(parent);
+    }else return nullptr;
     
 }
-IRNodeObject* IRAnnotationWorkspace::createTextObjectFromId()
+IRNodeObject* IRAnnotationWorkspace::createTextObjectFromId(IRWorkspaceComponent* parent)
 {
-    return IRObjectCreater<IRVNTextEditorObject>().create(this, getStr());
+    return IRObjectCreater<IRVNTextEditorObject>().create(parent, parent->getStr());
 }
-IRNodeObject* IRAnnotationWorkspace::createShapeObjectFromId()
+IRNodeObject* IRAnnotationWorkspace::createShapeObjectFromId(IRWorkspaceComponent* parent)
 {
-    return IRObjectCreater<IRVNShapeObject>().create(this, getStr());
+    return IRObjectCreater<IRVNShapeObject>().create(parent, parent->getStr());
 }
-IRNodeObject* IRAnnotationWorkspace::createImageObjectFromId()
+IRNodeObject* IRAnnotationWorkspace::createImageObjectFromId(IRWorkspaceComponent* parent)
 {
-    return IRObjectCreater<IRVNImageViewerObject>().create(this, getStr());
+    return IRObjectCreater<IRVNImageViewerObject>().create(parent, parent->getStr());
 }

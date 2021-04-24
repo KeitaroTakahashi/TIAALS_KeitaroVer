@@ -15,6 +15,7 @@ VideoAnnotaterWindow::VideoAnnotaterWindow(IRStr* str) : DocumentWindow("Video A
 {
     
     setUsingNativeTitleBar(true);
+    setResizeLimits(1000, 600, 6000, 6000);
     this->view.reset( new VideoAnnotaterView(str) );
     this->view->setBounds(0, 0, 1200, 800);
     setContentOwned(this->view.get(), false);

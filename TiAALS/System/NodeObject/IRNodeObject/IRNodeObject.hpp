@@ -60,6 +60,8 @@ public:
 
     virtual t_json saveThisToSaveData();
     virtual void loadThisFromSaveData(t_json saveData);
+    
+    t_json saveAnnotationData();
     // ==================================================
     // Controller
     // to controll position of this project etc.

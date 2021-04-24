@@ -98,10 +98,12 @@ void VideoPlayerView::nothingSelected()
 
 void VideoPlayerView::nodeObjectCreated(IRNodeObject* obj)
 {
-    
-    std::cout << "VideoPlayerView::nodeObjectCreated\n";
-    if(this->nodeObjectCreatedAction != nullptr)
-        this->nodeObjectCreatedAction(obj);
+    if(this->requestCreatingSequencerObject)
+    {
+        std::cout << "VideoPlayerView::nodeObjectCreated\n";
+        if(this->nodeObjectCreatedAction != nullptr)
+            this->nodeObjectCreatedAction(obj);
+    }
 }
 
 
@@ -188,10 +190,9 @@ void VideoPlayerView::videoLoadCompleteAction()
     
     setInitialBoundsOfWorkspace(vb);
     
-    /*
-    this->annotationWorkspace->setUserDefinedRatio(Rectangle<float>(vb.getX(), vb.getY(), (float)vb.getWidth()/100.0, (float)vb.getHeight()/100.0));
-    this->annotationWorkspace->setZoomRatio(1.0);
-    */
+    resized();
+
+
     std::cout << "video load completed " << vb.getWidth() << ", " << vb.getHeight() << std::endl;
     
    if(this->videoLoadCompletedCallback != nullptr)
@@ -202,6 +203,14 @@ void VideoPlayerView::videoLoadCompleteAction()
     resized();
     repaint();
 
+    
+    // if this method is called during loading the savedata, then operate subsequent process
+    if(this->loadingSaveData)
+    {
+        loadRestSaveDataAfterVideoLoaded();
+        this->loadingSaveData = false;
+    }
+    
 }
 
 // --------------------------------------------------
@@ -349,12 +358,13 @@ void VideoPlayerView::updateAnimationFrame()
 
 t_json VideoPlayerView::getSaveData()
 {
-    auto ws = getWorkspace()->getSaveData();
+    //auto ws = getWorkspace()->getSaveData();
     
     int videoSizePercent = getWorkspace()->getController()->getVideoAnnotaterController()->getVideoSizePercent();
     
+    Rectangle<int> vb = this->videoPlayer.getVideoBounds();
     t_json data = t_json::object({
-        {"workspace", ws},
+       // {"workspace", ws},
         {"videoFilePath", this->videoFilePath.toStdString()},
         {"videoSizePercent", videoSizePercent},
     });
@@ -364,15 +374,25 @@ t_json VideoPlayerView::getSaveData()
 }
 void VideoPlayerView::loadFromSaveData(t_json saveData)
 {
-    std::cout << "VideoPlayerView::loadFromSaveData\n";
-    std::cout << saveData.dump() << std::endl;
-    this->videoFilePath = saveData["videoFilePath"].string_value();
-
-    //openFile(File(this->videoFilePath));
-    getWorkspace()->loadFromSaveData(saveData["workspace"]);
-
-    int videoSizePercent = saveData["videoSizePercent"].int_value();
-    getWorkspace()->getController()->getVideoAnnotaterController()->setVideoSizePercent(videoSizePercent);
-    videoSizePercentChangedAction(videoSizePercent);
     
+    // First, load video file and get video information
+    // Second, load sequencer objects and create corresponding annotations
+    
+    
+    this->videoFilePath = saveData["videoFilePath"].string_value();
+    int videoSizePercent = saveData["videoSizePercent"].int_value();
+    this->temporarlVideoSizePercent = videoSizePercent;
+        
+    this->loadingSaveData = true;
+    
+    // open file asyncrhonically
+    openFile(File(this->videoFilePath), true);
+    
+    // wait until video load completed
+
+}
+void VideoPlayerView::loadRestSaveDataAfterVideoLoaded()
+{
+    getWorkspace()->getController()->getVideoAnnotaterController()->setVideoSizePercent(this->temporarlVideoSizePercent);
+    videoSizePercentChangedAction(this->temporarlVideoSizePercent);
 }

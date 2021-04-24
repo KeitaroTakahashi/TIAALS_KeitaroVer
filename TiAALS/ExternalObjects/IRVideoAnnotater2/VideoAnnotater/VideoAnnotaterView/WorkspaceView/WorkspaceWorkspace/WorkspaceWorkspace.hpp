@@ -37,6 +37,10 @@ public:
     void createNodeObjectOnWorkspace(IRNodeObject* nodeObj);
     void createNodeObjectFromAnnotation(IRNodeObject* annotation);
     // --------------------------------------------------
+    void setAnnotationWorkspace(IRWorkspaceComponent* annotationWorkspace);
+    void removeAnnotationWorkspace();
+    // --------------------------------------------------
+
     
     void setPlayPosition(double pos);
     
@@ -52,9 +56,13 @@ public:
     // --------------------------------------------------
 
     t_json getSaveData();
-    void loadFromSaveData(t_json saveData);
+    void loadFromSaveData(t_json data);
     // --------------------------------------------------
+    private:
 
+    void loadThisFromSaveData(t_json saveData) override;
+    
+    IRNodeObject* loadObjectSaveData(t_json objData);
 
 private:
     
@@ -62,7 +70,9 @@ private:
 
     void videoLoadCompleteAction();
     // --------------------------------------------------
-    
+    IRWorkspaceComponent* annotationWorkspace = nullptr;
+    // --------------------------------------------------
+
     IRNodeObject* createTextObject();
     IRNodeObject* createTextSequenceObject();
     IRNodeObject* createShapeObject();

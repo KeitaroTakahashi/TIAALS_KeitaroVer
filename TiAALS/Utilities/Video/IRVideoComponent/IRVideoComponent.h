@@ -159,21 +159,26 @@ public:
                 
         this->isCallback = callback;
                 
-        this->player_without_controller->loadAsync(url, [this] (const URL& u, Result r) {
-            videoLoadingFinished (u, r);
-        });
+        if(callback)
+        {
+            this->player_without_controller->loadAsync(url, [this] (const URL& u, Result r) {
+                videoLoadingFinished (u, r);
+            });
+        }else{
+            Result r = this->player_without_controller->load(url);
+            videoLoadingFinished(url, r);
+        }
 
     }
     
     void videoLoadingFinished (const URL& url, Result result)
     {
-        ignoreUnused (url);
+        //ignoreUnused (url);
 
         if(result.wasOk()){
             
             this->isVideoLoaded = true;
                         
-            //this->videoSize = this->player_with_controller->getVideoNativeSize();
             this->videoSize = this->player_without_controller->getVideoNativeSize();
 
             this->aspectRatio = (float)this->videoSize.getWidth() / (float)this->videoSize.getHeight();
@@ -191,11 +196,11 @@ public:
             }
             
             setVideoPlayer();
+            
             // here we need to call resized() of this class. This resized() does not probagate to its parent resized()
-
             resized();
             
-            //std::cout << "complete video load : length = " << getVideoLength() << std::endl;
+            std::cout << "complete video load : length = " << getVideoLength() << std::endl;
             
             if(this->isCallback)
             {

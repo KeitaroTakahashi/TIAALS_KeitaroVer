@@ -67,8 +67,6 @@ void VideoAnnotaterView::initializeArea(bool setInitialBounds)
     
     int leftArea = getWidth() - marginX * 3 - ctlw;
     int videoHeight = getHeight() * 0.6;
-
-    std::cout << "videoHeight = " << videoHeight << std::endl;
     
     this->videoPlayerArea = Rectangle<int>(x, y, leftArea, videoHeight);
     this->videoPlayerRect = Rectangle<int>(30, 30, leftArea - 60, videoHeight - 60);
@@ -115,6 +113,9 @@ void VideoAnnotaterView::createViews()
     addAndMakeVisible(this->workspaceView.get());
     this->workspaceView->nothingSelectedAction = [this] { nothingSelectedAction(); };
     this->workspaceView->nodeObjectGetFocusedAction = [this] (IRNodeObject* focusedObj) { nodeObjectGetFocusedAction(focusedObj); };
+    
+    // give videoAnnotationWorkspace to the workspaceWorkspace
+    this->workspaceView->getWorkspace()->setAnnotationWorkspace(this->videoPlayerView->getWorkspace());
 
 
 }
@@ -127,9 +128,15 @@ void VideoAnnotaterView::nothingSelectedAction()
 
 void VideoAnnotaterView::nodeObjectCreatedAction(IRNodeObject* obj)
 {
-    
+    std::cout << "#### VideoAnnotaterView::nodeObjectCreatedAction\n";
     this->workspaceView->getWorkspace()->createNodeObjectFromAnnotation(obj);
 }
+
+void VideoAnnotaterView::sequencerObjectWantsAnnotationObject(IRNodeObject* annotation)
+{
+    
+}
+
 
 void VideoAnnotaterView::nodeObjectGetFocusedAction(IRNodeObject* focusedObj)
 {
@@ -276,6 +283,13 @@ void VideoAnnotaterView::videoLoadCompletedAction()
     this->transport.setVideoLengthInSec(this->videoPlayerView->getVideoLength());
     this->transport.setCurrentPlayingPosition(0);
     this->workspaceView->setVideoLength(this->videoPlayerView->getVideoLength());
+    
+    if(this->loadingSaveData)
+    {
+        if(this->videoLoadAndLoadSaveDataCompletedCallback != nullptr)
+            this->videoLoadAndLoadSaveDataCompletedCallback();
+        this->loadingSaveData = false;
+    }
 }
 
 // ----------------------------------------
@@ -329,6 +343,7 @@ t_json VideoAnnotaterView::getVideoWorkspaceSaveData()
 
 void VideoAnnotaterView::loadVideoWorkspaceSaveData(t_json saveData)
 {
+    this->loadingSaveData = true; // go to videoLoadCompletedAction()
     this->videoPlayerView->loadFromSaveData(saveData);
 }
 
@@ -336,7 +351,19 @@ t_json VideoAnnotaterView::getSequenceWorkspaceSaveData()
 {
     return this->workspaceView->getWorkspace()->getSaveData();
 }
+
 void VideoAnnotaterView::loadSequenceWorkspaceSaveData(t_json saveData)
 {
+    // disable requestCreatingSequencerObject before loading sequenceWorkspace
+    // When loading save data, it starts creating sequencer objects prior to the corresponding annotation objects
+    // and sequencer objects create annotation objects, which this process is opposite to the ordinary one.
+    // Normally, creating annotation objects omits the signal to this class to create annotation objects, but in case of loading the save data, it will cause an infinite loop.
+    
+    
+    this->videoPlayerView->setRequestCreatingSequencerObject(false);
     this->workspaceView->getWorkspace()->loadFromSaveData(saveData);
+    this->videoPlayerView->setRequestCreatingSequencerObject(true);
+
 }
+
+// ----------------------------------------

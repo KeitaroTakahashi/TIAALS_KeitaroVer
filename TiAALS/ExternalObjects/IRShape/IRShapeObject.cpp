@@ -189,20 +189,3 @@ void IRShapeObject::arrangeControllerChangeListenerCallback (ChangeBroadcaster* 
 {
     
 }
-
-
-
-void IRShapeObject::zoomRatioChanged(float ratio)
-{
-    float lineWidth = controller->getShapeController()->getLineWidth();
-    
-    //adjust line width only if both width and height are zoomable otherwise keep the same line width
-    if(isWidthZoomable() && isHeightZoomable())
-    {
-        float fixedLineWidth = lineWidth / ratio;
-        if(fixedLineWidth < 1.0) fixedLineWidth = 1.0;
-        this->UI->setLineWidth(fixedLineWidth);
-    }
-    repaint();
-
-}

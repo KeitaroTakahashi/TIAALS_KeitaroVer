@@ -97,9 +97,19 @@ void ObjectMenuComponent::itemReleased(IRObjectFactory2::t_object* obj)
     
     topSpace->createObject(nodeObj);
     
-    auto visibleSpace = topSpace->getVisibleArea();
-    nodeObj->setObjectCentredPosition(visibleSpace.getX() + visibleSpace.getWidth()/2,
-                                      visibleSpace.getY() + visibleSpace.getHeight()/2);
+    auto visibleSpace = topSpace->getTransformedVisibleArea(); //topSpace->getVisibleArea();
+    
+    //std::cout << "visibleArea = " << visibleSpace.getX() << ", " << visibleSpace.getY() << ", " << visibleSpace.getWidth() << ", " << visibleSpace.getHeight() << std::endl;
+    
+    float zoomRatio = topSpace->getZoomRatio();
+    
+    nodeObj->setObjectCentredPosition((visibleSpace.getX() + visibleSpace.getWidth()/2) / zoomRatio,
+                                      (visibleSpace.getY() + visibleSpace.getHeight()/2) / zoomRatio);
+    
+    //std::cout << "center position " << (visibleSpace.getX() + visibleSpace.getWidth()/2) / zoomRatio << ", " << (visibleSpace.getY() + visibleSpace.getHeight()/2) / zoomRatio << " : zoomRatio " << zoomRatio << std::endl;
+    
+    //std::cout << "original center position " << (visibleSpace.getX() + visibleSpace.getWidth()/2) << ", " << (visibleSpace.getY() + visibleSpace.getHeight()/2) << std::endl;
+
     
 }
 // ==================================================

@@ -64,24 +64,7 @@ void IRObjectBase::boundChangeTask(Rectangle<int> bounds, NotificationType n)
     if(this->bType == ABSOLUTE)
     {
         setBounds(bounds);
-        
-        
-        /*
-        if(this->parent != nullptr)
-        {
 
-            //update relative bounds to parent
-            Rectangle<int> pb = this->parent->getBounds();
-            Rectangle<float> b ((float)bounds.getX() / (float)pb.getWidth(),
-                                (float)bounds.getY() / (float)pb.getHeight(),
-                                (float)bounds.getWidth() / (float)pb.getWidth(),
-                                (float)bounds.getHeight() / (float)pb.getHeight());
-            setObjectBoundsRelative(b);
-            
-        }*/
-        //std::cout << "ORDINARY\n";
-
-        
     }else if(this->bType == RELATIVE)
     {
         
@@ -147,12 +130,12 @@ void IRObjectBase::zoomObjectByRatio(float ratio, bool wZoom, bool hZoom, bool i
     
     this->zoomRatio = ratio;
     
-    float x = (float)this->initialBounds.getX();
-    float y = (float)this->initialBounds.getY();
-    float w = (float)this->initialBounds.getWidth();
-    float h = (float)this->initialBounds.getHeight();
+    float x = this->initialBounds.getX();
+    float y = this->initialBounds.getY();
+    float w = this->initialBounds.getWidth();
+    float h = this->initialBounds.getHeight();
     
-    float newW = w / ratio;
+    float newW = ceil(w / ratio); // reduce error
     float newH = h;
     if(hZoom) newH = newW * this->originalAspect;
     
@@ -163,6 +146,7 @@ void IRObjectBase::zoomObjectByRatio(float ratio, bool wZoom, bool hZoom, bool i
     
     if(newW <= 0) newW = 1;
     if(newH <= 0) newH = 1;
+    
     setObjectBoundsByRatioChange(Rectangle<int>(newX, newY, newW, newH));
     
     if(isCallback)

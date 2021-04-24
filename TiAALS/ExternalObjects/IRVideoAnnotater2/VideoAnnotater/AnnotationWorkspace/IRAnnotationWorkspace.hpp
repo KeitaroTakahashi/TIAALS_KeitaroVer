@@ -24,14 +24,16 @@ public:
     
     // --------------------------------------------------
     
-    void loadThisFromSaveData(json11::Json saveData) override;
+    virtual void loadThisFromSaveData(json11::Json saveData) override;
     // --------------------------------------------------
+    
+    IRNodeObject* createObjectFromId(String id, IRWorkspaceComponent* parent);
+
 private:
     
-    IRNodeObject* createObjectFromId(String id);
-    IRNodeObject* createTextObjectFromId();
-    IRNodeObject* createShapeObjectFromId();
-    IRNodeObject* createImageObjectFromId();
+    IRNodeObject* createTextObjectFromId(IRWorkspaceComponent* parent);
+    IRNodeObject* createShapeObjectFromId(IRWorkspaceComponent* parent);
+    IRNodeObject* createImageObjectFromId(IRWorkspaceComponent* parent);
 
 };
 

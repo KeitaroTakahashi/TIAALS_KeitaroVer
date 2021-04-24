@@ -41,6 +41,8 @@ public:
     void loadVideoWorkspaceSaveData(t_json saveData);
     t_json getSequenceWorkspaceSaveData();
     void loadSequenceWorkspaceSaveData(t_json saveData);
+    
+    std::function<void()> videoLoadAndLoadSaveDataCompletedCallback = nullptr;
     //-----------------------------------
 
     void initializeAndOpenFile();
@@ -50,8 +52,9 @@ public:
     
     void playPositionChangedBySliderAction();
 
+
 private:
-    
+    bool loadingSaveData = false;
     //-----------------------------------
     
     void resized() override;
@@ -71,6 +74,10 @@ private:
     void nothingSelectedAction();
     void nodeObjectGetFocusedAction(IRNodeObject* focusedObj);
     void nodeObjectCreatedAction(IRNodeObject* obj);
+    
+    // this method is called when sequencer object is created which has an annotation
+    // it happens when loading save data
+    void sequencerObjectWantsAnnotationObject(IRNodeObject* annotation);
     //-----------------------------------
 
     std::shared_ptr<VideoPlayerView> videoPlayerView;

@@ -102,6 +102,17 @@ private:
     float videoEnd = 0.0;
 
     void videoLoadCompleteAction();
+    // --------------------------------------------------
+    void loadRestSaveDataAfterVideoLoaded();
+    bool loadingSaveData = false;
+    int temporarlVideoSizePercent = 100;
+    
+    // --------------------------------------------------
+    bool requestCreatingSequencerObject = true;
+public:
+    void setRequestCreatingSequencerObject(bool flag) { this->requestCreatingSequencerObject = flag; }
+    bool isRequestCreatingSequencerObject() const { return this->requestCreatingSequencerObject; }
+
     
     // --------------------------------------------------
 

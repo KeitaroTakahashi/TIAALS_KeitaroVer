@@ -360,5 +360,116 @@ t_json WorkspaceWorkspace::getSaveData()
 void WorkspaceWorkspace::loadFromSaveData(t_json saveData)
 {
     loadThisFromSaveData(saveData["workspace"]);
+}
 
+void WorkspaceWorkspace::loadThisFromSaveData(t_json data)
+{
+    
+    std::cout << "WorkspaceWorkspace::loadThisFromSaveData\n";
+    auto appearance = data["Appearance"];
+    auto ap = appearance["aspectRatio"].array_items();
+    Rectangle<float> aspectRatio = Rectangle<float>(0,0,ap[0].number_value(), ap[1].number_value());
+    setUserDefinedRatio(aspectRatio);
+    
+    setZoomRatio(1.0);
+    
+    json11::Json Objects = data["Objects"];
+    json11::Json::array objectArray = Objects.array_items();
+
+
+    for (int i = 0; i < objectArray.size(); i++) // for each item of the array...
+    {
+        for (auto it = objectArray[i].object_items().cbegin(); it != objectArray[i].object_items().cend(); ++it)
+        {
+            
+            std::cout << " ===== " << it->first << " ===== " << std::endl;
+            
+            // ===== create object =====
+            std::string objectTypeId = it->second["objectType"].string_value();
+            std::cout << "create sequencer object" << objectTypeId << std::endl;
+
+            IRNodeObject* obj = createObjectFromId(objectTypeId, this);
+            
+            
+            
+            json11::Json arrangeCtl = it->second["ArrangeController"];
+            obj->setZoomRatio(1.0);
+            obj->loadArrangeControllerSaveData(arrangeCtl);
+
+            createObject(obj);
+
+            // load save dada
+            obj->loadThisFromSaveData(it->second["ObjectDefined"]);
+            
+            
+            auto annotation = it->second["Annotation"];
+                        
+            std::cout << it->second["hasAnnotation"].bool_value() << ", " << annotation["hasAnnotation"].bool_value() << std::endl;
+            
+            
+            if(annotation["hasAnnotation"].bool_value())
+            {
+                std::cout <<"hasAnnotation\n";
+                
+                obj->setAnnotation(loadObjectSaveData(annotation["annotationObject"]));
+                
+                
+                
+            }else{
+                std::cout << "no annotation\n";
+            }
+            // ===== END =====
+        }
+    }
+    //setZoomRatio(1.0);
+
+    
+}
+
+IRNodeObject* WorkspaceWorkspace::loadObjectSaveData(t_json objData)
+{
+    
+    if(this->annotationWorkspace == nullptr) return nullptr;
+    
+    std::string objectTypeId = objData["objectType"].string_value();
+    
+    std::cout << "create annotation object " << objectTypeId << std::endl;
+    IRNodeObject* obj = createObjectFromId(objectTypeId, this->annotationWorkspace);
+
+    auto annotation = objData["Annotation"];
+
+    if(annotation["hasAnnotation"].bool_value())
+    {
+        obj->setAnnotation(loadObjectSaveData(annotation["annotationObject"]));
+    }
+    
+    json11::Json arrangeCtl = objData["ArrangeController"];
+        
+    obj->setZoomRatio(1.0);
+    obj->loadArrangeControllerSaveData(arrangeCtl);
+
+    // bind to the annotation workspace
+    this->annotationWorkspace->createObject(obj);
+    
+    // load save dada
+    obj->loadThisFromSaveData(objData["ObjectDefined"]);
+    
+    auto bb = obj->getInitialBounds();
+    std::cout << "load object bounds " << bb.getX() << ", " << bb.getY() <<", " << bb.getWidth() << ", " << bb.getHeight() << std::endl;
+    
+    return obj;
+    
+}
+
+// --------------------------------------------------
+
+
+void WorkspaceWorkspace::setAnnotationWorkspace(IRWorkspaceComponent* annotationWorkspace)
+{
+    this->annotationWorkspace = annotationWorkspace;
+}
+
+void WorkspaceWorkspace::removeAnnotationWorkspace()
+{
+    this->annotationWorkspace = nullptr;
 }

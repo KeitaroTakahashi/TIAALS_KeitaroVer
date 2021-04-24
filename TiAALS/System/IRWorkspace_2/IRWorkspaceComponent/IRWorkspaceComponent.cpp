@@ -22,11 +22,12 @@ index(index)
     this->ir_str = str;
     setOpaque(true);
     
+    setMovableMargin(Rectangle<int>(50, 50, 0, 0));
+    
     this->controller.reset( new IRWorkspaceController(str) );
     
     setWantsKeyboardFocus(true);
-    
-    
+        
     this->controller->addChangeListener(this);
 
     //createCover();
@@ -250,14 +251,19 @@ void IRWorkspaceComponent::zoomBasedOn(Rectangle<int>baseBound)
 }
 void IRWorkspaceComponent::zoom(const MouseEvent& e, float zoomFactor)
 {
+    /*
     float m_x = (float)e.getEventRelativeTo(this).getPosition().getX();
     float m_y = (float)e.getEventRelativeTo(this).getPosition().getY();
     
     float x=0;
     float y=0;
-    float w = (float)getWidth();
-    float newW = w * zoomFactor;
+    float w = this->zoomedWidth;//(float)getWidth();
     
+    double zf = zoomFactor;//1.0 + ((zoomFactor - 1.0) * 0.1);
+    float newW = w * zf;
+    
+    
+    //std::cout << "zoomFactor = " << zoomFactor << std::endl;
     // adjust width in case smaller than the minimum sise
     float minW = this->minSize.getWidth();
     float minH = this->minSize.getHeight();
@@ -266,6 +272,8 @@ void IRWorkspaceComponent::zoom(const MouseEvent& e, float zoomFactor)
         newW = minW;
     }
     
+    this->zoomedWidth = newW;
+
     float newH = 0;
     
     if(this->heightZoomable) newH = newW * this->originalAspect;
@@ -285,14 +293,33 @@ void IRWorkspaceComponent::zoom(const MouseEvent& e, float zoomFactor)
     {
         //y = 0;
     }
+     */
+
+    auto p = getTransform();
+    
+    auto t = AffineTransform(p);
+    t = t.translated(-e.getPosition().getX(),
+                                          -e.getPosition().getY()).
+    scaled(zoomFactor).
+    translated(e.getPosition().getX(),
+               e.getPosition().getY());
+        
+
+    setTransform(t);
+    
+    // calculate zoomRatio
+    
+    float currentW = (float)getParentComponent()->getLocalArea(this, getLocalBounds()).getWidth();
+    this->zoomRatio = currentW / (float)this->originalBounds.getWidth();
+    
+
+    /*
     setBounds(Rectangle<int>(x, y, newW, newH));
 
-    this->zoomRatio = (float)originalBounds.getWidth() / (float)newW;
-    
-    std::cout << "this->zoomRatio = " << this->zoomRatio << std::endl;
     
     // adjust object coordinates
     adJustObjectsToZoomRatio();
+     */
     
     // update guide value
     setGuidValue(this->guideValue);
@@ -303,7 +330,7 @@ void IRWorkspaceComponent::setZoomRatio(float zoomRatio)
     
     //std::cout << "IRWorkspaceComponent::setZoomRatio = " << zoomRatio << std::endl;
     auto b = this->originalBounds.toFloat();
-
+    /*
     float x=0;
     float y=0;
     float w = b.getWidth();
@@ -316,6 +343,7 @@ void IRWorkspaceComponent::setZoomRatio(float zoomRatio)
     }
     float newH = newW * this->originalAspect;
 
+    this->zoomedWidth = newW;
     
     auto p = getParentComponent();
     
@@ -328,6 +356,26 @@ void IRWorkspaceComponent::setZoomRatio(float zoomRatio)
     
     this->zoomRatio = 1.0 / zoomRatio;
     adJustObjectsToZoomRatio();
+     */
+    
+   
+    //auto p = getTransform();
+    
+    auto t = AffineTransform();
+    /*
+    t = t.translated(-e.getPosition().getX(),
+                                          -e.getPosition().getY()).
+    scaled(zoomRatio).
+    translated(e.getPosition().getX(),
+               e.getPosition().getY());
+     */
+    
+    setTransform(AffineTransform::scale(zoomRatio, zoomRatio));
+    
+    this->zoomRatio = zoomRatio;
+        
+   
+    
 }
 
 void IRWorkspaceComponent::setZoomRatio(float x, float y, float zoomRatio)
@@ -351,6 +399,7 @@ void IRWorkspaceComponent::setZoomRatio(float x, float y, float zoomRatio)
                              y,
                              newW,
                              b.getHeight()*zoomRatio));
+    this->zoomedWidth = newW;
     
     this->zoomRatio = 1.0 / zoomRatio;
     adJustObjectsToZoomRatio();
@@ -382,11 +431,13 @@ void IRWorkspaceComponent::setWidthZoomRatio(float zoomRatio, float height)
                              newW,
                              newH));
     
+    this->zoomedWidth = newW;
+    
     this->zoomRatio = 1.0 / zoomRatio;
     adJustObjectsToZoomRatio();
 }
 
-
+/*
 void IRWorkspaceComponent::setExpandRatio(float expandRatio)
 {
     //std::cout << "IRWorkspaceComponent::setZoomRatio = " << zoomRatio << std::endl;
@@ -418,7 +469,7 @@ void IRWorkspaceComponent::setExpandRatio(float expandRatio)
     adJustObjectsToZoomRatio();
 }
 
-
+*/
 
 void IRWorkspaceComponent::setZoomable(bool width, bool height)
 {
@@ -430,6 +481,8 @@ void IRWorkspaceComponent::setZoomable(bool width, bool height)
 void IRWorkspaceComponent::setOriginalBounds(Rectangle<int> originalBounds)
 {
     this->originalBounds = originalBounds;
+    
+    this->zoomedWidth = this->originalBounds.getWidth();
     
     // update bounds if not being resized
     if(!isResizing()) setBounds(this->originalBounds);
@@ -448,7 +501,8 @@ void IRWorkspaceComponent::adJustObjectsToZoomRatio()
     
     for(auto obj : getObjectList())
     {
-        obj->zoomObjectByRatio(zoomRatio, this->widthZoomable, this->heightZoomable, callbackFlag);
+        
+        obj->zoomObjectByRatio(this->zoomRatio, this->widthZoomable, this->heightZoomable, callbackFlag);
     }
 }
 
@@ -522,6 +576,15 @@ void IRWorkspaceComponent::mouseDown(const MouseEvent& e)
         callNothingSelected();
     }
     
+    this->offsetPos = getParentComponent()->getLocalPoint(this,Point<int>(0,0));
+    
+    this->offsetBounds = getParentComponent()->getLocalArea(this, getLocalBounds());
+       
+    //std::cout <<"offsetPos " << this->offsetPos.getX() << ", " << this->offsetPos.getY() << std::endl;
+           
+    
+    std::cout << "localArea " << this->offsetBounds.getX() << ", " << this->offsetBounds.getY() << ", " << this->offsetBounds.getWidth() << ", " << this->offsetBounds.getHeight() << std::endl;
+    
 }
 
 
@@ -530,8 +593,7 @@ void IRWorkspaceComponent::mouseMove(const MouseEvent& e)
     
     this->currentMousePosition = e.getEventRelativeTo(this).getPosition();
     
-    //std::cout << currentMousePosition.getX() << " , " << currentMousePosition.getY() << std::endl;
-    
+   
 }
 
 
@@ -605,45 +667,85 @@ void IRWorkspaceComponent::setMouseMagnify(const MouseEvent& e, float scaleFacto
 
 void IRWorkspaceComponent::setMouseWheelMove(const MouseEvent& e, const MouseWheelDetails& w)
 {
+    auto p = getParentComponent();
+    //get real bounds relative to the parent component
+    auto bounds = p->getLocalArea(this, getLocalBounds());
+    
     float deltaX = w.deltaX * 200.0;
     float deltaY = w.deltaY * 200.0;
-    float newX = (float)getX() + deltaX;
-    float newY = (float)getY() + deltaY;
-    auto p = getParentComponent();
-    float margin_w = p->getWidth() / 2;
-    float margin_h = 10;
+    //float newX = (float)getX() + deltaX;
+    //float newY = (float)getY() + deltaY;
+    float newX = (float)bounds.getX() + deltaX;
+    float newY = (float)bounds.getY() + deltaY;
+    
+    float width = (float)bounds.getWidth();
+    float height = (float)bounds.getHeight();
     
     // center margin
-    int c_x = (p->getWidth() - getWidth()) / 2;
-    int c_y = (p->getHeight() - getHeight()) / 2;
+    int c_x = 0;//(p->getWidth() - width) / 2;
+    int c_y = 0;//(p->getHeight() - height) / 2;
     
+    c_x = this->movableMargin.getX();
+    c_y = this->movableMargin.getY();
     
-    // if center margin is set
-    if(this->hasCenterMargin)
-    {
-        c_x = this->centerMargin.getX();
-        c_y = this->centerMargin.getY();
-        margin_w = this->centerMargin.getWidth();
-        margin_h = this->centerMargin.getHeight();
-        
-    }
+    //std::cout << "margin " << c_x << ", " << c_y << ", " << margin_w << ", " << margin_h << std::endl;
 
-    float th1 = (getWidth() - p->getWidth() + margin_w);
-    float th2 = (getHeight() - p->getHeight() + margin_h);
-        
-    
-    
-
-    // FIX TO THE MOVABLE AREA -----
-    // width plus margin is larger than the parent width
-    if(p->getWidth() <= (getWidth() + margin_w*2))
-    {
-        if(newX + getWidth() + margin_w > p->getWidth() + th1 + margin_w) newX = margin_w;
-        else if(-th1 > newX) newX = -th1;
-    }else if(p->getWidth() > (getWidth() + margin_w*2))
+    if(width < p->getWidth())
     {
         if(newX <= c_x) newX = c_x;
-        else if((newX + getWidth()) > p->getWidth() - c_x) newX = p->getWidth() - getWidth() - c_x;
+        if(newX + width + c_x >= p->getWidth()) newX = p->getWidth() - width - c_x;
+    }else{
+        
+        float surplus = width - p->getWidth();
+        if(newX < -(surplus+c_x)) newX = -(surplus+c_x);
+        if(newX > c_x) newX = c_x;
+        
+    }
+    
+    if(height < p->getHeight())
+    {
+        newY = ((p->getHeight()) - height)/2.0;
+    }else{
+        float surplus = height - p->getHeight();
+        if(newY < -(surplus+c_y)) newY = -(surplus+c_y);
+        if(newY > c_y) newY = c_y;
+    }
+    
+    /*
+    // FIX TO THE MOVABLE AREA -----
+    // width plus margin is larger than the parent width
+    if(p->getWidth() <= (width + margin_w*2))
+    {
+        if(newX + width + margin_w > p->getWidth() + th1 + margin_w)
+        {
+            float d = newX - margin_w;
+            deltaX = 0;
+            
+            newX = margin_w;
+            
+            
+        }
+        else if(-th1 > newX)
+        {
+            float d = newX - (-th1);
+            deltaX = 0;
+            newX = -th1;
+        }
+    }else if(p->getWidth() > (width + margin_w*2))
+    {
+        if(newX <= c_x){
+            
+            float d = newX - c_x;
+            deltaX = 0;
+            newX = c_x;
+            
+        }
+        else if((newX + width) > p->getWidth() - c_x){
+            
+            float d = newX - (p->getWidth() - width - c_x);
+            deltaX = 0;
+            newX = p->getWidth() - width - c_x;
+        }
     }
 
     //height plus margin is larger than the parent height
@@ -656,14 +758,29 @@ void IRWorkspaceComponent::setMouseWheelMove(const MouseEvent& e, const MouseWhe
         if(newY <= c_y) newY = c_y;
         else if(newY + getHeight() > p->getHeight() - c_y) newY = p->getHeight() - getHeight() - c_y;
     }
+    */
     
-    if(!this->widthZoomable && getWidth() <= p->getWidth()) newX = 0;
+    if(!this->widthZoomable && width <= p->getWidth()) newX = 0;
     if(!this->heightZoomable && getHeight() <= p->getHeight()) newY = 0;
     
     
-    this->controller->setInitialBounds(newX, newY, getWidth(), getHeight());
+    this->controller->setInitialBounds(newX, newY, width, height);
     
-    setTopLeftPosition(newX, newY);
+    auto ot = getTransform();
+    
+    auto t = AffineTransform(ot);
+    
+    
+    //std::cout << "delta = "<< deltaX << std::endl;
+    //t = t.translated(deltaX, deltaY);
+    
+    //std::cout << "xy = " << newX << "," << newY << std::endl;
+    t = t.withAbsoluteTranslation(newX, newY);
+    setTransform(t);
+    
+    
+    
+    //setTopLeftPosition(newX, newY);
 }
 
 
@@ -685,9 +802,7 @@ void IRWorkspaceComponent::modifierKeysChanged(const ModifierKeys &mod)
 // --------------------------------------------------
 
 void IRWorkspaceComponent::changeListenerCallback (ChangeBroadcaster* source)
-{
-    std::cout << "changeListenerCallback : " << source << std::endl;
-    
+{    
     if(source == this->controller.get())
     {
         controllerChanged();
@@ -770,13 +885,22 @@ void IRWorkspaceComponent::aspectRatioChangedAction()
 
 void IRWorkspaceComponent::setUserDefinedRatio(Rectangle<float> ratio)
 {
+    
+    // reset zoom
+    
+    setZoomRatio(1.0);
+    
     this->aspectRatio.setWidth(ratio.getWidth());
     this->aspectRatio.setHeight(ratio.getHeight());
     
     int newW = this->aspectRatio.getWidth() * 100;
     int newH = this->aspectRatio.getHeight() * 100;
     
-    auto b = Rectangle<int>(getX(), getY(),
+   // auto b = Rectangle<int>(getX(), getY(),
+    //                        newW,
+     //                       newH);
+    
+    auto b = Rectangle<int>(0, 0,
                             newW,
                             newH);
     setOriginalBounds(b);
@@ -795,15 +919,16 @@ void IRWorkspaceComponent::setUserDefinedRatio(Rectangle<float> ratio)
     if(y >= 0) y = (p->getHeight() - newH) / 2;
     else y = ratio.getY();
     
-    setBounds(Rectangle<int>(x, y, newW, newH));
+    setBounds(Rectangle<int>(0, 0, newW, newH));
+    this->controller->setInitialBounds(0, 0, newW, newH);
 
+    /*
     // keep zoom ratio
     this->zoomRatio = 1.0;
     
-    this->controller->setInitialBounds(x, y, newW, newH);
     
     adJustObjectsToZoomRatio();
-    
+    */
     
 }
 
@@ -871,6 +996,7 @@ json11::Json IRWorkspaceComponent::makeSaveDataOfThis()
                 {"objectType",          item->name.toStdString()},
                 {"objectUniqueID",      item->getUniqueID().toStdString()},
                 {"ArrangeController",   item->getArrangeControllerSaveData()},
+                {"Annotation",          item->saveAnnotationData()},
                 {"ObjectDefined",       item->saveThisToSaveData()}
                 
             })},
@@ -924,8 +1050,20 @@ void IRWorkspaceComponent::loadThisFromSaveData(json11::Json saveData)
             
             IRNodeObject* obj = static_cast<IRNodeObject*>(getStr()->createNewObject(objectTypeId, this, getStr()));
             
-            std::cout << objectTypeId << " created : " << obj << std::endl;
 
+            auto annotation = it->second["Annotation"];
+            
+            std::cout << "Annotation savedata = " << annotation.dump() << std::endl;
+            if(annotation["hasAnnotation"].bool_value())
+            {
+                std::cout <<"hasAnnotation\n";
+                
+                auto objData = annotation["annotationObject"];
+                
+            }else{
+                std::cout << "no annotation\n";
+            }
+            
             
             json11::Json arrangeCtl = it->second["ArrangeController"];
             obj->setZoomRatio(1.0);
@@ -1159,6 +1297,47 @@ void IRWorkspaceComponent::setPreventCreateObjectByKeyCommand(bool flag, String 
 {
     this->isPreventCreateObjectByKeyCommand = flag;
     this->preventCreateObjectMessage = message;
+}
+
+// ==================================================
+
+Rectangle<int> IRWorkspaceComponent::getTransformedVisibleArea()
+{
+    auto p = getParentComponent();
+    auto b = p->getLocalArea(this, getLocalBounds());
+        
+    int x = 0; int y = 0; int w = 0; int h = 0;
+    
+    int xw = b.getX() + b.getWidth();
+    int yh = b.getY() + b.getHeight();
+    if(b.getX() < 0)
+    {
+        x = -b.getX();
+        
+        if(xw > p->getWidth()) w = p->getWidth();
+        else w = xw;
+        
+    }else{
+        x = 0;
+        
+        if(xw > p->getWidth()) w = p->getWidth() - b.getX();
+        else w = b.getWidth();
+    }
+    
+    if(b.getY() < 0)
+    {
+        y = -b.getY();
+        
+        if(yh > p->getHeight()) h = p->getHeight();
+        else h = yh;
+        
+    }else{
+        y = 0;
+        if(yh > p->getHeight()) h = p->getHeight() - b.getY();
+        else h = b.getHeight();
+    }
+    
+    return Rectangle<int>(x,y,w,h);
 }
 
 // ==================================================

@@ -148,7 +148,6 @@ t_json IRNodeObject::getArrangeControllerSaveData()
     
     auto ib = getInitialBounds();
     
-    std::cout << "initialBounds saving... " << ib.getWidth() << ", " << ib.getHeight() << std::endl;
     contents += "\"initialBounds\": [" + std::to_string(ib.getX()) +
     ", " + std::to_string(ib.getY()) +
     ", " + std::to_string(ib.getWidth()) +
@@ -178,6 +177,39 @@ t_json IRNodeObject::getArrangeControllerSaveData()
     std::string err;
     return t_json::parse(contents,err);
     
+}
+
+t_json IRNodeObject::saveAnnotationData()
+{
+    
+    t_json ob;
+    bool hasAnnotation = hasAnnotationComponent();
+    if(hasAnnotation)
+    {
+        
+        auto item = static_cast<IRNodeObject*>(getAnnotationComponent());
+        
+        ob = t_json::object({
+            {"hasAnnotation", hasAnnotation},
+            {"annotationObject", json11::Json::object({
+
+                {"objectType",          item->name.toStdString()},
+                {"objectUniqueID",      item->getUniqueID().toStdString()},
+                {"ArrangeController",   item->getArrangeControllerSaveData()},
+                {"ObjectDefined",       item->saveThisToSaveData()}
+            })},
+
+        });
+        
+
+    }else{
+        
+        ob = t_json::object({
+            {"hasAnnotation", hasAnnotation}
+        });
+    }
+
+    return ob;
 }
 
 void IRNodeObject::arrangeControllerChangedCallback(ChangeBroadcaster* source)

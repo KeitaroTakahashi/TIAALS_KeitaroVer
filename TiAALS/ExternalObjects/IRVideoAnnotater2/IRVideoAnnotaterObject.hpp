@@ -42,7 +42,8 @@ private:
     void arrangeControllerChangeListener();
 
     // ----------------------------------------
-
+    void loadSaveDataAfterVideoLoadCompleted();
+    t_json squareWorkspace_temporalbuf;
     // ----------------------------------------
     // ----------------------------------------
 

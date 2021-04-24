@@ -81,6 +81,10 @@ public:
     bool isFullScreenMode() const { return this->isFullScreenModeFlag; }
     
     // ==================================================
+    // return visiblebounds transformed by AffineTransform method
+    Rectangle<int> getTransformedVisibleArea();
+    Rectangle<int> getOriginalVisibleArea();
+    // ==================================================
 
     //ASK ACTION
     //if enabled, workspace will ask user's approval before it operates the process.
@@ -124,6 +128,8 @@ private:
     void zoom(const MouseEvent& e, float zoomFactor);
     void zoomBasedOn(Rectangle<int>baseBound);
     
+    Point<int> offsetPos;
+    Rectangle<int>offsetBounds;
     // ==================================================
 
     String getTitle() { return this->title; }
@@ -271,7 +277,7 @@ public:
     // zoom only width, if height = 0 then keeps the previous height
     void setWidthZoomRatio(float zoomRatio, float height = 0);
 
-    void setExpandRatio(float expandRatio);
+    //void setExpandRatio(float expandRatio);
     
     void setZoomable(bool width, bool height);
 
@@ -399,9 +405,9 @@ private:
     
     IRStr* ir_str;
     
-    Rectangle<int> draggableMargin;
-    Rectangle<int> movableMargin;
-    Rectangle<int> centerMargin;
+    Rectangle<int> draggableMargin = Rectangle<int>(0,0,0,0);
+    Rectangle<int> movableMargin = Rectangle<int>(0,0,0,0);
+    Rectangle<int> centerMargin = Rectangle<int>(0,0,0,0);
     bool hasCenterMargin = false;
     
     Rectangle<float> aspectRatio;
@@ -554,11 +560,16 @@ private:
     
     float zoomRatio = 1.0;
     
+    AffineTransform previousTransform;
+  
+    
     bool widthZoomable = false;
     bool heightZoomable = false;
     
     Rectangle<int> originalBounds;
     float originalAspect = 1.0; // h / w
+    
+    float zoomedWidth = 0.0;
     
     // minimum workspace size
     Rectangle<int> minSize;

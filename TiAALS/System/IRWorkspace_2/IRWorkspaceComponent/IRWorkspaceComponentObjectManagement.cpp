@@ -74,8 +74,8 @@ void IRWorkspaceComponent::duplicateSelectedObjects()
 void IRWorkspaceComponent::createObject(IRNodeObject *obj, bool shouldSort)
 {
     std::cout << "createObject ==================================================\n ";
-    
-    //obj->setEditMode(isEditMode());
+        
+    //obj->setTransform(AffineTransform::scale(this->zoomRatio));
     
     obj->setResizableMargin(this->draggableMargin);
     // make uniqueID
@@ -93,8 +93,8 @@ void IRWorkspaceComponent::createObject(IRNodeObject *obj, bool shouldSort)
     obj->setZoomable(this->widthZoomable, this->heightZoomable);
     obj->setZoomRatio(this->zoomRatio);
     // adjust object size to the zoom ratio only if both width and height are zoomable
-    if(this->widthZoomable && this->heightZoomable)
-        obj->setObjectSize(obj->getWidth() / this->zoomRatio, obj->getHeight() / this->zoomRatio);
+    //if(this->widthZoomable && this->heightZoomable)
+     //   obj->setObjectSize(obj->getWidth() / this->zoomRatio, obj->getHeight() / this->zoomRatio);
     
     
     // use this function in order to update file manger of all related UIs etc.
@@ -107,27 +107,20 @@ void IRWorkspaceComponent::createObject(IRNodeObject *obj, bool shouldSort)
         this->mixer.addAudioSource(obj->getAudioSource());
     }
 
-    //request updating the workspaceList
-    if(requestWorkspaceListUpdate != nullptr) requestWorkspaceListUpdate();
-    
-    // register this object to the first place of ZOrder list
-
-    /*
-    if(!shouldSort)
-    {
-        insertObjectAtTopZOrder(obj);
-    }else{
-        obj->bringToFront();
-        getStr()->projectOwner->rebindOpenGLContents();
-    }*/
     
     // register this object to ZOrderIndex but do not refresh heavy weight component order.
     insertObjectAtTopZOrder(obj);
     obj->toFront(true);
 
     obj->setEditMode(isEditMode());
+    
+    // let parent componet know
     callNodeObjectCreated(obj);
-    //obj->setSelected(true);
+
+    //request updating the workspaceList
+    if(requestWorkspaceListUpdate != nullptr) requestWorkspaceListUpdate();
+
+
     repaint();
     
 }

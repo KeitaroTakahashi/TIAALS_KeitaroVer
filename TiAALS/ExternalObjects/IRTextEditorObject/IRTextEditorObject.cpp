@@ -96,7 +96,6 @@ t_json IRTextEditorObject::saveThisToSaveData()
         {"textContents", this->textEditor.getText().toStdString()}
     });
     
-    std::cout << "saveThisToSaveData : textHeight = " << this->font.getHeight() << std::endl;
 
     return save;
 }
@@ -545,19 +544,3 @@ void IRTextEditorObject::applyFontFromController()
 }
 
 // ------------------------------------------------------------
-
-void IRTextEditorObject::zoomRatioChanged(float ratio)
-{
-    
-    if(isWidthZoomable() && isHeightZoomable())
-    {
-        int fontSize = this->font.getHeight();
-        
-        // change only the font size of textEditor and not for controller
-        // this is temporarl change. The original font size should be maintained
-        float fixedFontSize = fontSize / ratio;
-        if(fixedFontSize < 1.0) fixedFontSize = 1.0;
-        this->textEditor.applyFontToAllText(fixedFontSize);
-        textArrangeChanged();
-    }
-}

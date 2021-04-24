@@ -89,7 +89,7 @@ void IRVideoAnnotater::arrangeControllerChangeListener()
 
 t_json IRVideoAnnotater::saveThisToSaveData()
 {
-    /*
+  
     auto annotater = this->videoAnnotaterWindow->getView();
     
     auto videoPlayerWorkspace = annotater->getVideoWorkspaceSaveData();
@@ -104,20 +104,37 @@ t_json IRVideoAnnotater::saveThisToSaveData()
         {"videoAnnotater", saveData}
     });
     
-    return save;*/
+    return save;
     
     return t_json();
 }
+
 void IRVideoAnnotater::loadThisFromSaveData(t_json data)
 {
-    /*
     t_json s = data["videoAnnotater"];
     
     auto videoPlayerWorkspace = s["videoPlayerWorkspace"];
     auto sequencerWorkspace = s["sequencerWorkspace"];
+    this->squareWorkspace_temporalbuf = sequencerWorkspace;
     
     auto annotater = this->videoAnnotaterWindow->getView();
+    //annotater->videoLoadAndLoadSaveDataCompletedCallback = [this]{loadSaveDataAfterVideoLoadCompleted();};
+    
+    // load save data for video workspace including loading a video file
     annotater->loadVideoWorkspaceSaveData(videoPlayerWorkspace);
-    annotater->loadSequenceWorkspaceSaveData(sequencerWorkspace);
-     */
+    annotater->loadSequenceWorkspaceSaveData(this->squareWorkspace_temporalbuf);
+
+    // when a video and related data is loaded, then loadSaveDataAfterVideoLoadCompleted() is called to load sequencer and annotation objects.
 }
+
+void IRVideoAnnotater::loadSaveDataAfterVideoLoadCompleted()
+{
+    auto annotater = this->videoAnnotaterWindow->getView();
+    //annotater->setRequestCreatingSequencerObject(false);
+    std::cout << "IRVideoAnnotater::loadSaveDataAfterVideoLoadCompleted\n";
+    annotater->loadSequenceWorkspaceSaveData(this->squareWorkspace_temporalbuf);
+    //annotater->setRequestCreatingSequencerObject(true);
+
+}
+
+// ----------------------------------------
