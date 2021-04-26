@@ -111,11 +111,20 @@ void IRNodeObjectSelector::mouseDragHandler(const MouseEvent& e)
         
        juce::Point<int> delta = e.getEventRelativeTo(getBeingDraggedObject()).getPosition() - this->mouseDownWithinTarget;
 
+        int index = 0;
         for (auto comp: this->selectedObjectList)
         {
             if (comp != nullptr)
             {
-
+                
+                
+                // store the angle
+                float angle = comp->getRotateAngle();
+                // reset rotation first
+                // ONLY IF the multiple objects are selected
+                if(comp != getBeingDraggedObject() && this->selectedObjectList.size() > 1) comp->setRotateAngle(0);
+                
+                // then move
                 Rectangle<int> bounds (comp->getBounds());
                 bounds += delta;
                 
@@ -126,6 +135,11 @@ void IRNodeObjectSelector::mouseDragHandler(const MouseEvent& e)
                 
                 adaptToDraggableArea(bounds);
                 comp->setObjectBounds(bounds);
+                
+                // recover rotation
+                if(comp != getBeingDraggedObject() && this->selectedObjectList.size() > 1) comp->setRotateAngle(angle);
+                
+                index ++;
             }
         }
         
