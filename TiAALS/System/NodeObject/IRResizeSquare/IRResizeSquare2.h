@@ -259,10 +259,7 @@ private:
         
         if(this->resizingSquareClicked != nullptr)
             this->resizingSquareClicked(this->direction);
-        
-        
-        
-        //callResizingSquareClicked(this->direction);
+
     }
     
     void itemReleased(ResizingItem* item)
@@ -271,14 +268,14 @@ private:
         
         if(this->resizingSquareReleased != nullptr)
             this->resizingSquareReleased(this->direction);
-        //callResizingSquareReleased(this->direction);
     }
     
     void itemDragged(const MouseEvent& e)
     {
+        
+        // mouse event should be relative to the component where the parent object is binded on
         if(this->resizingSquareDragged != nullptr)
-            this->resizingSquareDragged(e);
-        //callResizingSquareDragged(e);
+            this->resizingSquareDragged(e.getEventRelativeTo(this->componentBindedOn).getEventRelativeTo(this->resizedComponent));
     }
     // ==================================================
 

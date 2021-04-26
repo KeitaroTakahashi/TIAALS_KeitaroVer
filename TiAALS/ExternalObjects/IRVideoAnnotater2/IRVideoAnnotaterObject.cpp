@@ -51,6 +51,13 @@ void IRVideoAnnotater::paint(Graphics& g)
 
 // ----------------------------------------
 
+IRNodeObject* IRVideoAnnotater::copyThisObject()
+{
+    IRVideoAnnotater* newObj = new IRVideoAnnotater(this->parent, getStr());
+    return newObj;
+}
+// ----------------------------------------
+
 void IRVideoAnnotater::IRChangeListenerCallback (ChangeBroadcaster* source)
 {
     if(source == this->controller->getVideoAnnotaterController())

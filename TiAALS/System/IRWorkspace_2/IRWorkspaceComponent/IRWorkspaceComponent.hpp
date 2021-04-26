@@ -128,6 +128,9 @@ private:
     void zoom(const MouseEvent& e, float zoomFactor);
     void zoomBasedOn(Rectangle<int>baseBound);
     
+    void zoomByAffineTransform(const MouseEvent& e, float zoomFactor);
+    void zoomByTraditionalWay(const MouseEvent& e, float zoomFactor);
+    
     Point<int> offsetPos;
     Rectangle<int>offsetBounds;
     // ==================================================
@@ -280,6 +283,10 @@ public:
     //void setExpandRatio(float expandRatio);
     
     void setZoomable(bool width, bool height);
+    void setZoomableByMouseWheel(bool flag);
+
+    void setWidthZoomableTraditionalWay(bool w);
+    bool isWidthZoomableTraditionalWay() const { return this->widthZoomableTraditionalWay; }
 
     // ==================================================
 
@@ -563,8 +570,15 @@ private:
     AffineTransform previousTransform;
   
     
-    bool widthZoomable = false;
-    bool heightZoomable = false;
+    bool widthZoomable = true;
+    bool heightZoomable = true;
+    bool zoomableByMouseWheel = true;
+    
+    bool widthZoomableTraditionalWay = false;
+    
+    void wheelByAffineTransform(float newX, float newY);
+    void wheelByBounds(float newX, float newY);
+
     
     Rectangle<int> originalBounds;
     float originalAspect = 1.0; // h / w

@@ -56,7 +56,7 @@ void WorkspaceView::resized()
     this->workspace->setMinSize(getWidth(), getHeight());
 
     float ratioW = (float)getWidth() / b.getWidth();
-    
+    std::cout << "ratioW = " << ratioW << std::endl;
     // height adjust
     this->workspace->setWidthZoomRatio(ratioW, getHeight());
 }

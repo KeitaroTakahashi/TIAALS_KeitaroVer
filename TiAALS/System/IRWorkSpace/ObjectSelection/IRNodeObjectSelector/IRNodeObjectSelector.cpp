@@ -108,14 +108,8 @@ void IRNodeObjectSelector::mouseDragHandler(const MouseEvent& e)
     {
         if (! isDragging()) return;
         
-       juce::Point<int> delta = e.getEventRelativeTo(getBeingDraggedObject()).getPosition() - this->mouseDownWithinTarget;
         
-        /*
-        delta.setX( floor(delta.getX()/this->guideInterval)
-                   * this->guideInterval);
-        delta.setY( floor(delta.getY()/this->guideInterval)
-                   * this->guideInterval);
-         */
+       juce::Point<int> delta = e.getEventRelativeTo(getBeingDraggedObject()).getPosition() - this->mouseDownWithinTarget;
 
         for (auto comp: this->selectedObjectList)
         {
@@ -155,7 +149,6 @@ void IRNodeObjectSelector::mouseUpHandler(const MouseEvent& e)
 
 void IRNodeObjectSelector::selectAllObjects()
 {
-    std::cout << "selectAllObjects\n";
     this->selectedObjectList.clear();
     for (auto obj : *this->objectList)
     {

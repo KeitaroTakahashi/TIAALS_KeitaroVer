@@ -197,32 +197,7 @@ void IRNodeComponent::setResizingArea(juce::Point<float> area)
 {
     this->resizingArea = area;
 }
-/*
 
-// min max setter
-void IRNodeComponent::setMinimumWidth(const float newMin)
-{
-    this->minWidth = newMin;
-}
-
-
-void IRNodeComponent::setMinimumHeight(const float newMin)
-{
-    this->minHeight = newMin;
-}
-
-
-void IRNodeComponent::setMaximumWidth(const float newMax)
-{
-    this->maxWidth = newMax;
-}
-
-
-void IRNodeComponent::setMaximumHeight(const float newMax)
-{
-    this->maxHeight = newMax;
-}
-*/
 
 // EVENTS FOR OVERRIDE
 void IRNodeComponent::mouseDownEvent(const MouseEvent& e)

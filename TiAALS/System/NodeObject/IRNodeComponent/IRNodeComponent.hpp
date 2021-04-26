@@ -295,17 +295,7 @@ private:
     std::shared_ptr<MixerAudioSource> mixer;
     // if this object contains any AudioSource
     bool containAudioSourceFlag = false;
-    
-   
-    
-    // Object appearance setup
-    /*
-    float minWidth = 10;
-    float minHeight = 10;
-    
-    float maxWidth = 3000;
-    float maxHeight = 3000;
-    */
+ 
     
     // for resize event
     float previousWidth = 0;

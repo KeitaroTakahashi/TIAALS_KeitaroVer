@@ -17,8 +17,12 @@ VideoAnnotaterDelegate(base)
 {
     setOpaque(false);
     
-    // set only width zoomable
-    setZoomable(true, false);
+    // disable zoom feature by AffineTransform
+    setZoomable(false, false);
+    // only enable zoom feature by traditional way
+    setWidthZoomableTraditionalWay(true);
+    
+    setZoomableByMouseWheel(false);
     setCenterMargin(Rectangle<int>(1,1,0,0));
 
     setWantsKeyboardFocus(true);
@@ -422,8 +426,6 @@ void WorkspaceWorkspace::loadThisFromSaveData(t_json data)
         }
     }
     //setZoomRatio(1.0);
-
-    
 }
 
 IRNodeObject* WorkspaceWorkspace::loadObjectSaveData(t_json objData)

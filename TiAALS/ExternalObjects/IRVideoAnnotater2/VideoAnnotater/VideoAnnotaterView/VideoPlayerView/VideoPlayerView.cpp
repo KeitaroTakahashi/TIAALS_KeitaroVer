@@ -30,7 +30,7 @@ videoPlayer(false), empty(str)
     this->annotationWorkspace->videoSizePercentCallback = [this] (int val) { videoSizePercentChangedAction(val); };
 
     // default video bounds ratio relative to workspace bounds
-    setVideoBoundsScale(0.7);
+    setVideoBoundsScale(0.65);
 }
 
 VideoPlayerView::~VideoPlayerView()
@@ -57,6 +57,15 @@ void VideoPlayerView::resized()
     this->videoPlayer.setBounds(x, y, w, h);
     //adjusted bound size
     auto vb = this->videoPlayer.getVideoBounds();
+    
+    //do this only once after video file is loaded.
+    if(this->requestInitialBoundsToWorkspace)
+    {
+        setInitialBoundsOfWorkspace(vb);
+        this->requestInitialBoundsToWorkspace = false;
+    }
+    
+    
     // annotation workspace
     auto ab = this->annotationWorkspace->getOriginalBounds();
     
@@ -74,11 +83,14 @@ void VideoPlayerView::resized()
         x = (b.getWidth() - (float)ab.getWidth() * ratioW) / 2.0;
         y = (b.getHeight() - (float)ab.getHeight() * ratioW) / 2.0;
         this->annotationWorkspace->setZoomRatio(x, y, ratioW);
+        
     }
 
-    this->empty.setBounds(this->annotationWorkspace->getBounds());
-
-    //this->annotationWorkspace->setDraggableMarginWithInThisComponent();
+    //this->empty.setBounds(this->annotationWorkspace->getBounds());
+    auto annotaitonBounds = getLocalArea(this->annotationWorkspace.get(), this->annotationWorkspace->getLocalBounds());
+    
+    this->empty.setBounds(annotaitonBounds);
+    this->annotationWorkspace->setDraggableMarginWithInThisComponent();
     
 }
 
@@ -184,16 +196,30 @@ void VideoPlayerView::videoSizePercentChangedAction(int val)
 
 void VideoPlayerView::videoLoadCompleteAction()
 {
+    
+    this->requestInitialBoundsToWorkspace = true;
+    
     this->annotationWorkspace->setPreventCreateObjectByKeyCommand(false, "");
     
-    Rectangle<int> vb = this->videoPlayer.getVideoBounds();
+    /*
+    auto b = getLocalBounds();
     
+    int w = b.getWidth() * this->videoScale;
+    int h = b.getHeight() * this->videoScale;
+    
+    int x = (b.getWidth() - w) / 2.0;
+    int y = (b.getHeight() - h) / 2.0;
+    
+    this->videoPlayer.setBounds(x, y, w, h);
+    //adjusted bound size
+    auto vb = this->videoPlayer.getVideoBounds();
+    
+
     setInitialBoundsOfWorkspace(vb);
-    
+    */
     resized();
 
-
-    std::cout << "video load completed " << vb.getWidth() << ", " << vb.getHeight() << std::endl;
+    //std::cout << "video load completed " << vb.getWidth() << ", " << vb.getHeight() << std::endl;
     
    if(this->videoLoadCompletedCallback != nullptr)
        this->videoLoadCompletedCallback();
@@ -295,11 +321,8 @@ void VideoPlayerView::stopVideo()
 // ---------------------------------------------
 void VideoPlayerView::setInitialBoundsOfWorkspace(Rectangle<int> initialBounds)
 {
-    
     this->annotationWorkspace->setUserDefinedRatio(Rectangle<float>(0,0, (float)initialBounds.getWidth() / 100.0, (float)initialBounds.getHeight() / 100.0));
-    this->annotationWorkspace->setZoomRatio(1.0);
     this->annotationWorkspace->setMinSize(10, 10);
-
 }
 
 void VideoPlayerView::setInitialBoundsOfWorkspace(Rectangle<float> initialBounds)
@@ -309,7 +332,6 @@ void VideoPlayerView::setInitialBoundsOfWorkspace(Rectangle<float> initialBounds
                                                                     initialBounds.getY(),
                                                                     initialBounds.getWidth() / 100.0,
                                                                     initialBounds.getHeight() / 100.0));
-    //this->annotationWorkspace->setZoomRatio(1.0);
     this->annotationWorkspace->setMinSize(10, 10);
 
 }

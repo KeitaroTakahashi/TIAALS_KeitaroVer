@@ -30,6 +30,10 @@ void IRObjectBase::setBoundType(IRBoundType type)
 
 void IRObjectBase::setInitialBounds(Rectangle<float> initialBounds)
 {
+    
+    
+    
+    
     this->originalAspect = (float)initialBounds.getHeight() / (float)initialBounds.getWidth();
 
     this->initialBounds = divRectangle(initialBounds, this->zoomRatio);
@@ -71,10 +75,7 @@ void IRObjectBase::boundChangeTask(Rectangle<int> bounds, NotificationType n)
         //setBoundsRelative(this->relativeBoundsToParent);
     }
     
-    // at the end, do rotate if angle is given
-    //doRotate(true, this->rotateAngle);
-    
-    
+
     aboutToResized();
     
     if(n == sendNotification) ObjectBoundsChanged(bounds);
@@ -84,6 +85,7 @@ void IRObjectBase::boundChangeTask(Rectangle<int> bounds, NotificationType n)
 
 void IRObjectBase::setObjectBounds(Rectangle<int> bounds, NotificationType n)
 {
+   
     this->setInitialBounds(bounds.toFloat());
     boundChangeTask(bounds, n);
 
@@ -135,17 +137,19 @@ void IRObjectBase::zoomObjectByRatio(float ratio, bool wZoom, bool hZoom, bool i
     float w = this->initialBounds.getWidth();
     float h = this->initialBounds.getHeight();
     
-    float newW = ceil(w / ratio); // reduce error
+    float newW = w * ratio; // reduce error
     float newH = h;
     if(hZoom) newH = newW * this->originalAspect;
     
-    float newX = x / ratio;
+    float newX = x * ratio;
     float newY = y;
     
-    if(hZoom) newY = y / ratio;
+    if(hZoom) newY = y * ratio;
     
     if(newW <= 0) newW = 1;
     if(newH <= 0) newH = 1;
+    
+    std::cout << "initialBounds "<< x << ", "<< y <<", " << w <<", " <<h << " : zoomObjectByRatio newW " << newW << " : ratio = " << ratio << std::endl;
     
     setObjectBoundsByRatioChange(Rectangle<int>(newX, newY, newW, newH));
     
@@ -274,7 +278,6 @@ void IRObjectBase::setSize(float width, float height)
     
     setObjectBounds(x, y, w, h);
     
-    
     aboutToResized();
 }
 
@@ -317,16 +320,24 @@ void IRObjectBase::hasMoved()
 
 Rectangle<float> IRObjectBase::divRectangle(Rectangle<float> bounds, float ratio)
 {
+    
+    std::cout << "------ divRectangle ------" << std::endl;
+    
+    
+ 
+
+    
     float x = bounds.getX();
     float y = bounds.getY();
     float w = bounds.getWidth();
     float h = bounds.getHeight();
-    float newW = w * ratio;
+    
+    float newW = w / ratio;
     float newH = newW * this->originalAspect;
-    float newX = x * ratio;
-    float newY = y * ratio;
+    float newX = x / ratio;
+    float newY = y / ratio;
 
-    if(!this->widthZoomable)
+    if(!this->widthZoomable && !this->widthZoomableTraditionalWay)
     {
         newX = x;
         newW = w;
@@ -343,6 +354,11 @@ void IRObjectBase::setZoomable(bool width, bool height)
 {
     this->widthZoomable = width;
     this->heightZoomable = height;
+}
+
+void IRObjectBase::setWidthZoomableTraditionalWay(bool w)
+{
+    this->widthZoomableTraditionalWay = w;
 }
 
 // ==================================================

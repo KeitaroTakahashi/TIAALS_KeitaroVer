@@ -88,11 +88,14 @@ void IRObjectResizer::setResizableMargin(Rectangle<int> margin)
 
 void IRObjectResizer::adjustCurrentXYToResizableArea(int& currentX, int& currentY, const MouseEvent& e)
 {
-    int x = e.getScreenX();
-    int y = e.getScreenY();
+    //int x = e.getScreenX();
+    //int y = e.getScreenY();
 
-    int parentX = this->parent->getScreenX();
-    int parentY = this->parent->getScreenY();
+    int x = e.getEventRelativeTo(this->parent).getPosition().getX();
+    int y = e.getEventRelativeTo(this->parent).getPosition().getY();
+    
+    int parentX = this->parent->getX();
+    int parentY = this->parent->getY();
     
     // margin for the resizable
     int marginX = this->resizableMargin.getX();
@@ -116,38 +119,6 @@ void IRObjectResizer::adjustCurrentXYToResizableArea(int& currentX, int& current
     currentY = y;
 }
 
-
-void IRObjectResizer::resizeTopLeftComponentEvent(const MouseEvent& e)
-{
-    int currentX = 0;
-    int currentY = 0;
-    adjustCurrentXYToResizableArea(currentX, currentY, e);
-    
-    float deltaX = currentX - e.getMouseDownScreenX();
-    float deltaY = currentY - e.getMouseDownScreenY();
-    
-    float cosine = cos(angle * double_Pi / 180.0);
-    float sine = sin(angle * double_Pi / 180.0);
-    float amountX = deltaX * cosine + deltaY * sine;
-    float amountY = -deltaX * sine + deltaY * cosine;
-    
-    float newWidth = this->previousWidth - amountX;
-    float newHeight = this->previousHeight - amountY;
-    float newX = this->previousX + amountX;
-    float newY = this->previousY + amountY;
-    
-    if(newWidth < this->minWidth)
-    {
-        newX = this->previousX + (this->previousWidth - this->minWidth);
-        newWidth = this->minWidth;
-    }
-    if(newHeight < this->minHeight)
-    {
-        newY = this->previousY + (this->previousHeight - this->minHeight);
-        newHeight = this->minHeight;
-    }
-    resizeParentObject(Rectangle<int>(newX, newY, newWidth, newHeight));
-}
 
 Rectangle<float> IRObjectResizer::calcRotatedXY(float deltaX, float deltaY, float angle)
 {
@@ -176,14 +147,58 @@ Rectangle<float> IRObjectResizer::calcRotatedXY(float deltaX, float deltaY, floa
     return Rectangle<float>(newX, newY, newWidth, newHeight);
 }
 
+void IRObjectResizer::resizeTopLeftComponentEvent(const MouseEvent& e)
+{
+    int currentX = 0;
+    int currentY = 0;
+        
+    
+    adjustCurrentXYToResizableArea(currentX, currentY, e);
+
+    //float deltaX = currentX - e.getMouseDownScreenX();
+    //float deltaY = currentY - e.getMouseDownScreenY();
+    
+    float deltaX = currentX - e.getEventRelativeTo(parent).getMouseDownX();
+    float deltaY = currentY - e.getEventRelativeTo(parent).getMouseDownY();
+    
+    
+    std::cout << "topLeft : " << currentX << ", " << currentY << " : " << e.getEventRelativeTo(parent).getMouseDownX() << ", " << e.getEventRelativeTo(parent).getMouseDownY() << std::endl;
+     
+    float cosine = cos(angle * double_Pi / 180.0);
+    float sine = sin(angle * double_Pi / 180.0);
+    float amountX = deltaX * cosine + deltaY * sine;
+    float amountY = -deltaX * sine + deltaY * cosine;
+    
+    float newWidth = this->previousWidth - amountX;
+    float newHeight = this->previousHeight - amountY;
+    float newX = this->previousX + amountX;
+    float newY = this->previousY + amountY;
+    
+    if(newWidth < this->minWidth)
+    {
+        newX = this->previousX + (this->previousWidth - this->minWidth);
+        newWidth = this->minWidth;
+    }
+    if(newHeight < this->minHeight)
+    {
+        newY = this->previousY + (this->previousHeight - this->minHeight);
+        newHeight = this->minHeight;
+    }
+    resizeParentObject(Rectangle<int>(newX, newY, newWidth, newHeight));
+}
+
+
 void IRObjectResizer::resizeTopRightComponentEvent(const MouseEvent& e)
 {
     int currentX = 0;
     int currentY = 0;
     adjustCurrentXYToResizableArea(currentX, currentY, e);
        
-    float deltaX = currentX - e.getMouseDownScreenX();
-    float deltaY = currentY - e.getMouseDownScreenY();
+    //float deltaX = currentX - e.getMouseDownScreenX();
+    //float deltaY = currentY - e.getMouseDownScreenY();
+    
+    float deltaX = currentX - e.getEventRelativeTo(parent).getMouseDownX();
+    float deltaY = currentY - e.getEventRelativeTo(parent).getMouseDownY();
     
     auto newBounds = calcRotatedXY(deltaX, deltaY, this->angle);
     
@@ -195,8 +210,11 @@ void IRObjectResizer::resizeBottomLeftComponentEvent(const MouseEvent& e)
     int currentY = 0;
     adjustCurrentXYToResizableArea(currentX, currentY, e);
     
-    float deltaX = currentX - e.getMouseDownScreenX();
-    float deltaY = currentY - e.getMouseDownScreenY();
+    //float deltaX = currentX - e.getMouseDownScreenX();
+    //float deltaY = currentY - e.getMouseDownScreenY();
+    
+    float deltaX = currentX - e.getEventRelativeTo(parent).getMouseDownX();
+    float deltaY = currentY - e.getEventRelativeTo(parent).getMouseDownY();
     
     float cosine = cos(angle * double_Pi / 180.0);
     float sine = sin(angle * double_Pi / 180.0);
@@ -227,8 +245,11 @@ void IRObjectResizer::resizeBottomRightComponentEvent(const MouseEvent& e)
     int currentY = 0;
     adjustCurrentXYToResizableArea(currentX, currentY, e);
 
-    float deltaX = currentX - e.getMouseDownScreenX();
-    float deltaY = currentY - e.getMouseDownScreenY();
+    //float deltaX = currentX - e.getMouseDownScreenX();
+    //float deltaY = currentY - e.getMouseDownScreenY();
+    
+    float deltaX = currentX - e.getEventRelativeTo(parent).getMouseDownX();
+    float deltaY = currentY - e.getEventRelativeTo(parent).getMouseDownY();
     
     float cosine = cos(angle * double_Pi / 180.0);
     float sine = sin(angle * double_Pi / 180.0);
@@ -257,8 +278,11 @@ void IRObjectResizer::resizeLeftComponentEvent(const MouseEvent& e)
     int currentY = 0;
     adjustCurrentXYToResizableArea(currentX, currentY, e);
     
-    float deltaX = currentX - e.getMouseDownScreenX();
-    float deltaY = currentY - e.getMouseDownScreenY();
+    //float deltaX = currentX - e.getMouseDownScreenX();
+    //float deltaY = currentY - e.getMouseDownScreenY();
+    
+    float deltaX = currentX - e.getEventRelativeTo(parent).getMouseDownX();
+    float deltaY = currentY - e.getEventRelativeTo(parent).getMouseDownY();
 
     float cosine = cos(angle * double_Pi / 180.0);
     float sine = sin(angle * double_Pi / 180.0);
@@ -285,8 +309,11 @@ void IRObjectResizer::resizeRightComponentEvent(const MouseEvent& e)
     int currentY = 0;
     adjustCurrentXYToResizableArea(currentX, currentY, e);
     
-    float deltaX = currentX - e.getMouseDownScreenX();
-    float deltaY = currentY - e.getMouseDownScreenY();
+    //float deltaX = currentX - e.getMouseDownScreenX();
+    //float deltaY = currentY - e.getMouseDownScreenY();
+    
+    float deltaX = currentX - e.getEventRelativeTo(parent).getMouseDownX();
+    float deltaY = currentY - e.getEventRelativeTo(parent).getMouseDownY();
 
     float cosine = cos(angle * double_Pi / 180.0);
     float sine = sin(angle * double_Pi / 180.0);
@@ -311,8 +338,11 @@ void IRObjectResizer::resizeTopComponentEvent(const MouseEvent& e)
     int currentY = 0;
     adjustCurrentXYToResizableArea(currentX, currentY, e);
     
-    float deltaX = currentX - e.getMouseDownScreenX();
-    float deltaY = currentY - e.getMouseDownScreenY();
+    //float deltaX = currentX - e.getMouseDownScreenX();
+    //float deltaY = currentY - e.getMouseDownScreenY();
+    
+    float deltaX = currentX - e.getEventRelativeTo(parent).getMouseDownX();
+    float deltaY = currentY - e.getEventRelativeTo(parent).getMouseDownY();
     
     float cosine = cos(angle * double_Pi / 180.0);
     float sine = sin(angle * double_Pi / 180.0);
@@ -336,8 +366,11 @@ void IRObjectResizer::resizeBottomComponentEvent(const MouseEvent& e)
     int currentX = 0;
     int currentY = 0;
     adjustCurrentXYToResizableArea(currentX, currentY, e);
-    float deltaX = currentX - e.getMouseDownScreenX();
-    float deltaY = currentY - e.getMouseDownScreenY();
+    //float deltaX = currentX - e.getMouseDownScreenX();
+    //float deltaY = currentY - e.getMouseDownScreenY();
+    
+    float deltaX = currentX - e.getEventRelativeTo(parent).getMouseDownX();
+    float deltaY = currentY - e.getEventRelativeTo(parent).getMouseDownY();
     
     float cosine = cos(angle * double_Pi / 180.0);
     float sine = sin(angle * double_Pi / 180.0);

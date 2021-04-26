@@ -82,9 +82,12 @@ public:
     float getZoomRatio() const { return this->zoomRatio; }
     
     void setZoomable(bool width, bool height);
+    void setWidthZoomableTraditionalWay(bool w);
     
     bool isWidthZoomable() const { return this->widthZoomable; }
     bool isHeightZoomable() const { return this->heightZoomable; }
+    
+    bool isWidthZoomableTraditionalWay() const { return this->widthZoomableTraditionalWay; }
     // ==================================================
     // use this method to paint something on this object
     virtual void paintOnThis(Graphics& g) {}
@@ -132,8 +135,8 @@ private:
     Rectangle<float> relativeBoundsToParent;
     
     // Object appearance setup
-    float minWidth = 10;
-    float minHeight = 10;
+    float minWidth = 20;
+    float minHeight = 20;
     float maxWidth = 3000;
     float maxHeight = 3000;
 
@@ -187,6 +190,8 @@ private:
     float zoomRatio = 1.0;
     bool widthZoomable = true;
     bool heightZoomable = true;
+    
+    bool widthZoomableTraditionalWay = false;
     // ==================================================
     
     Rectangle<float> divRectangle(Rectangle<float> bounds, float ratio);

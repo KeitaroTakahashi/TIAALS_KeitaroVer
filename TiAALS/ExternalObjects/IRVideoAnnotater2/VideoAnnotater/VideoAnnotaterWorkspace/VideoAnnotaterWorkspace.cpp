@@ -19,7 +19,6 @@ IRHeavyWeightComponent(this, "VideoAnnotaterWorkspace")
     setOpaque(false);
     
     setComponentAlpha(0.2);
-    // set only width zoomable
     setZoomable(true, true);
     setCenterMargin(Rectangle<int>(0,0,0,0));
     

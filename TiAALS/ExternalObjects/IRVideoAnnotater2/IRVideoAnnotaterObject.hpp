@@ -20,6 +20,10 @@ public:
     ~IRVideoAnnotater();
     // ----------------------------------------
     
+     IRNodeObject* copyThisObject() override; // called by copyThis() user defeined copy method
+
+    // ----------------------------------------
+
     t_json saveThisToSaveData() override;
     void loadThisFromSaveData(t_json data) override;
 private:

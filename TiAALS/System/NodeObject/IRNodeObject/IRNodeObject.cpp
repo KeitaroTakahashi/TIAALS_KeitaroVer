@@ -42,6 +42,9 @@ IRNodeObject* IRNodeObject::copyThis()
 
 IRNodeObject* IRNodeObject::copyThisObject()
 {
+    
+    KLib().showErrorMessage("Oops! This object does not override a virtual function copyThisObject() ! Can not copy! ");
+    
     return new IRNodeObject(this->parent, "IRNodeObject", getStr(), getBoundType());
 }
 

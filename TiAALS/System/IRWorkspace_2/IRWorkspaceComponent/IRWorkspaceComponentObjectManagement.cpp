@@ -91,6 +91,7 @@ void IRWorkspaceComponent::createObject(IRNodeObject *obj, bool shouldSort)
     this->objects.add(obj);
     
     obj->setZoomable(this->widthZoomable, this->heightZoomable);
+    obj->setWidthZoomableTraditionalWay(isWidthZoomableTraditionalWay());
     obj->setZoomRatio(this->zoomRatio);
     // adjust object size to the zoom ratio only if both width and height are zoomable
     //if(this->widthZoomable && this->heightZoomable)

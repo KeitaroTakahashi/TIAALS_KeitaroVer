@@ -70,7 +70,6 @@ IRWorkspaceComponent::~IRWorkspaceComponent()
 void IRWorkspaceComponent::paint (Graphics& g)
 {
     g.fillAll(this->backgroundColour);
-    
     //g.setColour(Colours::white);
     //g.drawRect(getLocalBounds());
     
@@ -251,16 +250,54 @@ void IRWorkspaceComponent::zoomBasedOn(Rectangle<int>baseBound)
 }
 void IRWorkspaceComponent::zoom(const MouseEvent& e, float zoomFactor)
 {
-    /*
+    if(this->zoomableByMouseWheel)
+    {
+        zoomByAffineTransform(e, zoomFactor);
+    }else
+    {
+        //zoomByTraditionalWay(e, zoomFactor);
+    }
+    
+}
+
+void IRWorkspaceComponent::zoomByAffineTransform(const MouseEvent& e, float zoomFactor)
+{
+
+    auto p = getTransform();
+    
+    float wZoom = zoomFactor;
+    if(!this->widthZoomable) wZoom = 1.0;
+    float hZoom = zoomFactor;
+    if(!this->heightZoomable) hZoom = 1.0;
+
+    auto t = AffineTransform(p);
+    t = t.translated(-e.getPosition().getX(),
+                                          -e.getPosition().getY()).
+    scaled(wZoom, hZoom).
+    translated(e.getPosition().getX(),
+               e.getPosition().getY());
+        
+
+    setTransform(t);
+    
+    // calculate zoomRatio
+    
+    float currentW = (float)getParentComponent()->getLocalArea(this, getLocalBounds()).getWidth();
+    this->zoomRatio = currentW / (float)this->originalBounds.getWidth();
+
+    setGuidValue(this->guideValue);
+}
+void IRWorkspaceComponent::zoomByTraditionalWay(const MouseEvent& e, float zoomFactor)
+{
+  
     float m_x = (float)e.getEventRelativeTo(this).getPosition().getX();
     float m_y = (float)e.getEventRelativeTo(this).getPosition().getY();
     
     float x=0;
     float y=0;
-    float w = this->zoomedWidth;//(float)getWidth();
+    float w = (float)getWidth();
     
-    double zf = zoomFactor;//1.0 + ((zoomFactor - 1.0) * 0.1);
-    float newW = w * zf;
+    float newW = w * zoomFactor;
     
     
     //std::cout << "zoomFactor = " << zoomFactor << std::endl;
@@ -279,9 +316,6 @@ void IRWorkspaceComponent::zoom(const MouseEvent& e, float zoomFactor)
     if(this->heightZoomable) newH = newW * this->originalAspect;
     else newH = (float)getHeight();
     
-    //auto p = getParentComponent();
-    
-    
     if(this->widthZoomable) x = (float)getX() - (m_x * zoomFactor - m_x);
     
     if(newW == minW && this->centerMargin.getX() == 0)
@@ -293,34 +327,17 @@ void IRWorkspaceComponent::zoom(const MouseEvent& e, float zoomFactor)
     {
         //y = 0;
     }
-     */
-
-    auto p = getTransform();
-    
-    auto t = AffineTransform(p);
-    t = t.translated(-e.getPosition().getX(),
-                                          -e.getPosition().getY()).
-    scaled(zoomFactor).
-    translated(e.getPosition().getX(),
-               e.getPosition().getY());
-        
-
-    setTransform(t);
     
     // calculate zoomRatio
     
-    float currentW = (float)getParentComponent()->getLocalArea(this, getLocalBounds()).getWidth();
-    this->zoomRatio = currentW / (float)this->originalBounds.getWidth();
+    //float currentW = (float)getParentComponent()->getLocalArea(this, getLocalBounds()).getWidth();
+    this->zoomRatio = (float)getWidth() / (float)this->originalBounds.getWidth();
     
-
-    /*
     setBounds(Rectangle<int>(x, y, newW, newH));
 
-    
     // adjust object coordinates
     adJustObjectsToZoomRatio();
-     */
-    
+ 
     // update guide value
     setGuidValue(this->guideValue);
 }
@@ -329,7 +346,7 @@ void IRWorkspaceComponent::setZoomRatio(float zoomRatio)
 {
     
     //std::cout << "IRWorkspaceComponent::setZoomRatio = " << zoomRatio << std::endl;
-    auto b = this->originalBounds.toFloat();
+    //auto b = this->originalBounds.toFloat();
     /*
     float x=0;
     float y=0;
@@ -358,31 +375,29 @@ void IRWorkspaceComponent::setZoomRatio(float zoomRatio)
     adJustObjectsToZoomRatio();
      */
     
-   
-    //auto p = getTransform();
-    
-    auto t = AffineTransform();
-    /*
-    t = t.translated(-e.getPosition().getX(),
-                                          -e.getPosition().getY()).
-    scaled(zoomRatio).
-    translated(e.getPosition().getX(),
-               e.getPosition().getY());
-     */
-    
+         
     setTransform(AffineTransform::scale(zoomRatio, zoomRatio));
-    
     this->zoomRatio = zoomRatio;
-        
-   
     
 }
 
 void IRWorkspaceComponent::setZoomRatio(float x, float y, float zoomRatio)
 {
-    auto b = this->originalBounds.toFloat();
-
     
+    //reset
+    
+    
+    //auto b = this->originalBounds.toFloat();
+    
+    setZoomRatio(zoomRatio);
+    
+    auto t = getTransform();
+    
+    t = t.withAbsoluteTranslation(x, y);
+    setTransform(t);
+    
+
+    /*
     float w = b.getWidth();
     float newW = w * zoomRatio;
     // adjust width in case smaller than the minimum sise
@@ -403,11 +418,25 @@ void IRWorkspaceComponent::setZoomRatio(float x, float y, float zoomRatio)
     
     this->zoomRatio = 1.0 / zoomRatio;
     adJustObjectsToZoomRatio();
+     */
 }
 
 
 void IRWorkspaceComponent::setWidthZoomRatio(float zoomRatio, float height)
 {
+    
+    // reset
+    /*
+    setZoomRatio(1.0);
+    
+    // change only height ratio
+    setUserDefinedRatio(Rectangle<float>(0, 0, this->aspectRatio.getWidth(), height/100.0));
+    
+    auto p = getTransform();
+
+    setTransform(AffineTransform::scale(zoomRatio, 1.0));
+    */
+    
     auto b = this->originalBounds.toFloat();
 
     float x=0;
@@ -426,14 +455,14 @@ void IRWorkspaceComponent::setWidthZoomRatio(float zoomRatio, float height)
     y = b.getY()*zoomRatio;
     
     
-        setBounds(Rectangle<int>(x,
-                             y,
+        setBounds(Rectangle<int>(0,
+                             0,
                              newW,
                              newH));
     
     this->zoomedWidth = newW;
     
-    this->zoomRatio = 1.0 / zoomRatio;
+    this->zoomRatio = zoomRatio;
     adJustObjectsToZoomRatio();
 }
 
@@ -477,6 +506,15 @@ void IRWorkspaceComponent::setZoomable(bool width, bool height)
     this->heightZoomable = height;
 }
 
+void IRWorkspaceComponent::setWidthZoomableTraditionalWay(bool w)
+{
+    this->widthZoomableTraditionalWay = w;
+}
+
+void IRWorkspaceComponent::setZoomableByMouseWheel(bool flag)
+{
+    this->zoomableByMouseWheel = flag;
+}
 
 void IRWorkspaceComponent::setOriginalBounds(Rectangle<int> originalBounds)
 {
@@ -766,21 +804,36 @@ void IRWorkspaceComponent::setMouseWheelMove(const MouseEvent& e, const MouseWhe
     
     this->controller->setInitialBounds(newX, newY, width, height);
     
-    auto ot = getTransform();
     
-    auto t = AffineTransform(ot);
-    
-    
-    //std::cout << "delta = "<< deltaX << std::endl;
-    //t = t.translated(deltaX, deltaY);
-    
-    //std::cout << "xy = " << newX << "," << newY << std::endl;
-    t = t.withAbsoluteTranslation(newX, newY);
-    setTransform(t);
+    if(this->zoomableByMouseWheel)
+    {
+        wheelByAffineTransform(newX, newY);
+    }else{
+        wheelByBounds(newX, newY);
+    }
     
     
     
     //setTopLeftPosition(newX, newY);
+}
+
+void IRWorkspaceComponent::wheelByAffineTransform(float newX, float newY)
+{
+ 
+    auto ot = getTransform();
+    
+    auto t = AffineTransform(ot);
+
+    t = t.withAbsoluteTranslation(newX, newY);
+    setTransform(t);
+
+}
+
+void IRWorkspaceComponent::wheelByBounds(float newX, float newY)
+{
+    
+      
+       setTopLeftPosition(newX, newY);
 }
 
 
@@ -908,7 +961,7 @@ void IRWorkspaceComponent::setUserDefinedRatio(Rectangle<float> ratio)
     //setBounds(b);
     
     // adjust position of the workspace
-    
+    /*
     auto p = getParentComponent();
     
     int x = 0;
@@ -918,8 +971,8 @@ void IRWorkspaceComponent::setUserDefinedRatio(Rectangle<float> ratio)
     int y = 0;
     if(y >= 0) y = (p->getHeight() - newH) / 2;
     else y = ratio.getY();
-    
-    setBounds(Rectangle<int>(0, 0, newW, newH));
+    */
+    setBounds(b);
     this->controller->setInitialBounds(0, 0, newW, newH);
 
     /*

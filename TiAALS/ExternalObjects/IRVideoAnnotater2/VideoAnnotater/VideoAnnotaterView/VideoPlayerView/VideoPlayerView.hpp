@@ -109,6 +109,11 @@ private:
     
     // --------------------------------------------------
     bool requestCreatingSequencerObject = true;
+    
+    // --------------------------------------------------
+    // if true then initialBounds are set in resize()
+    bool requestInitialBoundsToWorkspace = true;
+    
 public:
     void setRequestCreatingSequencerObject(bool flag) { this->requestCreatingSequencerObject = flag; }
     bool isRequestCreatingSequencerObject() const { return this->requestCreatingSequencerObject; }
